@@ -1,1 +1,1 @@
-# skripts-tasks
+# scripts-tasks
