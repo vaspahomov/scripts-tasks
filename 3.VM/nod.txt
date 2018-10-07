@@ -1,0 +1,9 @@
+input 1 8 
+input 2 4 
+input 3 0 
+while 2 3 
+mod 1 2 4 
+switch 1 2 
+switch 2 4  
+endWhile 
+output 1 

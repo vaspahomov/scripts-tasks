@@ -1,0 +1,204 @@
+
+<html>
+<head>
+	<title>Hamming</title>
+
+<style>
+.content {
+	margin: 10px;
+}
+.row {
+	width: 100%;
+	margin-bottom: 10px;
+}
+
+input[type="text"] {
+    background: #fff;
+    border: 1px solid #cbcbcb;
+    font-family: Arial;
+    font-size: 14px;
+    max-width: 100%;
+    outline: none;
+    padding: 2px 10px;
+    width: 10%;
+    box-shadow: none;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+input[type="button"] {
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+label {
+    display: block;
+    font-weight: normal;
+    padding: 2px;
+}
+</style>
+
+</head>
+<body>
+	<div class="content">
+		<h1>Hamming</h1>
+		<div class="row">
+			<label>Original message</label>
+			<input type='text' id='mes' maxlength='4'>
+			<input type='button' onclick='code()' value='Code'>
+		</div>
+		<div class="row">
+			<label>Coded message</label>
+			<input type='text' id='mes_cod'>
+		</div>
+	</div>
+
+</body>
+
+
+<script>
+	function do_encode() 
+    {
+		message = document.getElementById('message'); // Òî, ÷òî ââåë â ïîëå.
+        var s = message.value + ""; 
+        var string=[];
+        var pows = [];
+        var positions=[];
+        
+        for (var i = 0; i < s.length; i++)
+        {
+            string[i] = s.charAt(i);
+        }
+        var amount = (Math.log(s.length) / Math.log(2)).toFixed(0);
+        for (var j = 0; j < 10; j++)
+        {
+            pows[j] = Math.pow(2, j);
+        }
+        for (var p = 0; p <= amount; p++)
+        {
+            string.splice(pows[p] - 1, 0, "0");
+        }
+        function encode(string,pows) {
+            var r = "";
+            var calc = 0;
+            for (var i = 1; i < string.length + 1; i++) {
+                if (pows.indexOf(i) != -1) {
+                    var elem = i;
+                    for (var y = elem; y < string.length + 1; y += Math.pow(2, elem)) {
+                        var max = y + elem;
+                        if (max > string.length + 1)
+                            max = string.length + 1;
+                        for (var x = y; x < max; x++) {
+                            calc += parseInt(string[x - 1]);
+                        }
+                    }
+                    if (calc % 2 == 1) {
+                        r += '1';
+                        calc = 0;
+                    }
+                    else {
+                        r += '0';
+                        calc = 0;
+                    }
+                }
+                else r += string[i - 1];
+            }
+            return r;
+        }
+        var encoded = (encode(string,pows));
+        encoded_message = document.getElementById('encoded_message')
+        encoded_message.value = encoded;
+    }
+        
+    function do_decode(){
+            encoded_message = document.getElementById('encoded_message')
+		    restore_message=document.getElementById('restore_message')
+            var input = encoded_message.value + "";
+            var string = [];
+            var recstring = [];
+            var recovery ="";
+            var newPositions = [];
+            var newResult = 0;
+            var pows = [];
+            for (var j = 0; j < 10; j++)
+            {
+                pows[j] = Math.pow(2, j);
+            }
+            for (var i = 0; i < input.length; i++)
+            {
+                string[i] = input.charAt(i);
+            }
+            for (var k = 1; k < string.length+1; k++) {
+                if (pows.indexOf(k) == -1 || k == string.length)
+                    recovery += parseInt(string[k - 1]);
+            }
+            console.log(recovery);
+            function magic(recovery, recstring, pows) {
+                for (var i = 0; i < recovery.length; i++) {
+                    recstring[i] = recovery.charAt(i);
+                }
+                console.log(recstring);
+                var amount = (Math.log(recovery.length) / Math.log(2)).toFixed(0);
+                for (var p = 0; p <= amount; p++) {
+                    recstring.splice(pows[p] - 1, 0, "0");
+                }
+                var calc = 0;
+                var extraPos = "";
+                for (var i = 1; i < recstring.length + 1; i++) {
+                    console.log(recstring.length + 1);
+                    if (pows.indexOf(i) != -1) {
+                        var elem = i;
+                        for (var y = elem; y < recstring.length + 1; y += Math.pow(2, elem)) {
+                            var max = y + elem;
+                            if (max > recstring.length + 1)
+                                max = recstring.length + 1;
+                            for (var x = y; x < max; x++) {
+                                calc += parseInt(recstring[x - 1]);
+                            }
+                        }
+                        var result = calc % 2;
+                        if (result == parseInt(input[i - 1])) {
+                            extraPos += "0";
+                            calc = 0;
+                        }
+                        else {
+                            extraPos += "1";
+                            calc = 0;
+                        }
+                    }
+                }
+                return extraPos;
+            }
+            var binaryWrong = magic(recovery, recstring, pows);
+            console.log(binaryWrong);
+            var reversed = binaryWrong.split("").reverse().join("");
+            var wrongDigit = parseInt(reversed, 2);
+            if (wrongDigit == 0)
+                    restore_message.value = recovery;
+            else {
+                var stringToChange = input.split("");
+                if (stringToChange[wrongDigit - 1] == 1)
+                {
+                    stringToChange[wrongDigit - 1] = "0";
+                }
+                else
+                {
+                    stringToChange[wrongDigit - 1] = "1";
+                }
+                var fixed = stringToChange.join("");
+                var fixedString = [];
+                for (var i = 0; i < fixed.length; i++)
+                {
+                    fixedString[i] = fixed.charAt(i);
+                }
+                var fixedResult = "";
+                for (var k = 1; k < fixedString.length+1; k++) {
+                    if (pows.indexOf(k) == -1)
+                        fixedResult += parseInt(fixedString[k - 1]);
+                }
+                restore_message.value = fixedResult;
+            }
+}
+</script>
+</html>

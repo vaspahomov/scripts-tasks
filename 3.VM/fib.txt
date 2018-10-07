@@ -1,0 +1,7 @@
+input 1 1 
+input 2 1 
+repeat 2 
+add 1 2 1 
+switch 1 2 
+endRepeat 
+output 1 
